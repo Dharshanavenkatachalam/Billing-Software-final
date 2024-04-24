@@ -1,5 +1,9 @@
 from tkinter import *
 from tkinter import ttk
+from docxtpl import DocxTemplate
+import datetime
+import time
+from tkinter import messagebox
 
 tk=Tk()
 tk.geometry("1920x1080")
@@ -7,196 +11,135 @@ tk.config(bg="#F5F5F5")
 tk.title("Invoice - Ajra Tex")
 tk.configure(bg='white')
 
-def submit():
-    t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = t9 = t10 = 0
-    ea1 = float(d1.get())
-    ea2 = float(d2.get())
-    ea3 = float(d3.get())
-    ea4 = float(d4.get())
-    ea5 = float(d5.get())
-    ea6 = float(d6.get())
-    ea7 = float(d7.get())
-    ea8 = float(d8.get())
-    ea9 = float(d9.get())
-    ea10 = float(d10.get())
+def clear_item():
+    particulars_entry.delete(0,END)
+    quantity_entry.delete(0,END)
+    quantity_entry.insert(0, "0")
+    price_entry.delete(0,END)
+    price_entry.insert(0, "0.0")
     
-    eb1 = float(e1.get())
-    eb2 = float(e2.get())
-    eb3 = float(e3.get())
-    eb4 = float(e4.get())
-    eb5 = float(e5.get())
-    eb6 = float(e6.get())
-    eb7 = float(e7.get())
-    eb8 = float(e8.get())
-    eb9 = float(e9.get())
-    eb10 = float(e10.get())
+invoice_list = []
+def add_item():
+    particulars = particulars_entry.get()
+    quantity = int(quantity_entry.get())
+    unit_price = float(price_entry.get())
+    line_total = quantity*unit_price
+    invoice_item = [particulars, quantity, unit_price, line_total]
+    tree.insert('',0, values=invoice_item)
+    clear_item()
+    invoice_list.append(invoice_item) 
     
-    t1=ea1*eb1
-    t2=ea2*eb2
-    t3=ea3*eb3
-    t4=ea4*eb4
-    t5=ea5*eb5
-    t6=ea6*eb6
-    t7=ea7*eb7
-    t8=ea8*eb8
-    t9=ea9*eb9
-    t10=ea10*eb10
+    sub_total = sum(item[3] for item in invoice_list)
+    stotal_entry.delete(0,END)
+    stotal_entry.insert(0,sub_total)
     
-    tot = t1+t2+t3+t4+t5+t6+t7+t8+t9+t10
-    cg = tot*0.09
-    sg = tot*0.09
-    gtotal = tot+cg+sg
-    Label(tk,text=tot,font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1370,y=190)
-    Label(tk,text=cg,font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1370,y=230)
-    Label(tk,text=sg,font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1370,y=270)
-    Label(tk,text=gtotal,font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1420,y=340)
+    cgst_entry.delete(0,END)
+    cgst_entry.insert(0,sub_total*0.09)
     
-    f1 = Label(tk,text=str(t1),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=200)
-    f2 = Label(tk,text=str(t2),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=260)
-    f3 = Label(tk,text=str(t3),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=320)
-    f4 = Label(tk,text=str(t4),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=380)
-    f5 = Label(tk,text=str(t5),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=440)
-    f6 = Label(tk,text=str(t6),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=500)
-    f7 = Label(tk,text=str(t7),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=560)
-    f8 = Label(tk,text=str(t8),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=620)
-    f9 = Label(tk,text=str(t9),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=680)
-    f10 = Label(tk,text=str(t10),font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=980,y=740)
+    sgst_entry.delete(0,END)
+    sgst_entry.insert(0,sub_total*0.09)
     
+    gtotal_entry.delete(0,END)
+    gtotal_entry.insert(0,sub_total+sub_total*0.18)
+    
+def generate_invoice():
+    doc = DocxTemplate("invoice_template.docx")
+    name = name_entry.get()
+    address = address_entry.get()
+    phone = phone_number_entry.get()
+    gst = gst_entry.get()
+    current_date = datetime.date.today()
+    t = time.localtime()
+    current_time = time.strftime("%H:%M:%S", t)
+    subtotal = sum(item[3] for item in invoice_list)
+    cgst = subtotal*0.09
+    sgst = subtotal*0.09
+    gtotal = subtotal+cgst+sgst
+        
+    doc.render({"name":name,
+                "address":address,
+                "phone":phone,
+                "gst":gst,
+                "invoicedate":current_date,
+                "invoicetime":current_time,
+                "invoice_list": invoice_list,
+                "subtotal":subtotal,
+                "cgst":cgst,
+                "sgst":sgst,
+                "gtotal":gtotal})
+    
+    doc_name = "new_invoice" + name + datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S") + ".docx"
+    doc.save(doc_name)
+    
+    messagebox.showinfo("Invoice Complete", "Invoice Complete")
 
-a = Label(tk,text="AJRA TEX - KARUR",font=("Ailerons",40),bg="white",fg="#1A374D").pack()
-inv = Label(tk,text="Invoice Number: ",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=520,y=90)
-invi=Entry(tk,font=("Archivo Expanded",13),width=15,bd=2,justify="center")
-invbtn = Button(tk,text="Search",font=("Archivo Expanded",10),bg="#1A374D",fg="white").place(x=950,y=92)
+Label(tk,text="\n",bg="white",fg="#1A374D").pack()
+a = Label(tk,text="AJRA TEX - KARUR",font=("Arial", 30, "bold"),bg="white",fg="#1A374D").pack()
 
-b = Label(tk,text="Particulars",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=175,y=150)
-c = Label(tk,text="Size",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=460,y=150)
-d = Label(tk,text="Quantity",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=585,y=150)
-e = Label(tk,text="Rate",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=775,y=150)
-f = Label(tk,text="Amount",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=950,y=150)
+'''------- Buyer details -------'''
 
-line = Label(tk,text="------------------------",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=1300,y=150)
-total = Label(tk,text="Total : ",font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1300,y=190)
-cgst = Label(tk,text="CGST : ",font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1300,y=230)
-sgst = Label(tk,text="SGST : ",font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1300,y=270)
-gt = Label(tk,text="Grand Total: ",font=("Archivo Expanded",12),bg="white",fg="#1A374D").place(x=1300,y=340)
-line = Label(tk,text="------------------------",font=("Archivo Expanded",15),bg="white",fg="#1A374D").place(x=1300,y=370)
+name_label = Label(tk, text="Name",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=260,y=100)
+name_entry = Entry(tk,font=("Arial", 12),bd=3)
+name_entry.place(x=190,y=130)
 
-btn1 = Button(tk,text="Submit",font=("Archivo Expanded",13),fg="white",bg="#1A374D",command=submit).place(x=1350,y=500)
-btn2 = Button(tk,text="Print Invoice",font=("Archivo Expanded",13),fg="white",bg="#1A374D").place(x=1330,y=560)
-btn3 = Button(tk,text="Download Invoice",font=("Archivo Expanded",13),fg="white",bg="#1A374D").place(x=1300,y=620)
+address_label = Label(tk, text="Address",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=560,y=100)
+address_entry = Entry(tk,font=("Arial", 12),bd=3)
+address_entry.place(x=500,y=130)
 
-#Particulars
-b1=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b2=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b3=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b4=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b5=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b6=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b7=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b8=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b9=Entry(tk,font=("Archivo Expanded",13),bd=2)
-b10=Entry(tk,font=("Archivo Expanded",13),bd=2)
+phone_number_label = Label(tk, text="Phone number",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=850,y=100)
+phone_number_entry = Entry(tk,font=("Arial", 12),bd=3)
+phone_number_entry.place(x=810,y=130)
 
-#Size
-c1=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c2=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c3=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c4=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c5=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c6=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c7=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c8=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c9=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-c10=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
+gst_label = Label(tk, text="GST number",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1160,y=100)
+gst_entry = Entry(tk,font=("Arial", 12),bd=3)
+gst_entry.place(x=1110,y=130)
 
-#Quantity
-d1=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d1.insert(END,"0")
-d2=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d2.insert(0,"0")
-d3=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d3.insert(0,"0")
-d4=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d4.insert(0,"0")
-d5=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d5.insert(0,"0")
-d6=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d6.insert(0,"0")
-d7=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d7.insert(0,"0")
-d8=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d8.insert(0,"0")
-d9=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d9.insert(0,"0")
-d10=Entry(tk,font=("Archivo Expanded",13),width=5,bd=2,justify="center")
-d10.insert(0,"0")
+'''------- Product details -------'''
 
-#Rate
-e1=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e1.insert(0,"0")
-e2=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e2.insert(0,"0")
-e3=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e3.insert(0,"0")
-e4=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e4.insert(0,"0")
-e5=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e5.insert(0,"0")
-e6=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e6.insert(0,"0")
-e7=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e7.insert(0,"0")
-e8=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e8.insert(0,"0")
-e9=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e9.insert(0,"0")
-e10=Entry(tk,font=("Archivo Expanded",13),width=8,bd=2,justify="center")
-e10.insert(0,"0")
+particulars_label = Label(tk, text="Particulars",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=240,y=180)
+particulars_entry = Entry(tk,font=("Arial", 12),bd=3)
+particulars_entry.place(x=190,y=210)
 
-invi.place(x=720,y=93)
+quantity_label = Label(tk, text="Quantity",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=560,y=180)
+quantity_entry = Spinbox(tk, from_=1,to=100,font=("Arial", 12),bd=3)
+quantity_entry.place(x=500,y=210)
 
-b1.place(x=100,y=200)
-b2.place(x=100,y=260)
-b3.place(x=100,y=320)
-b4.place(x=100,y=380)
-b5.place(x=100,y=440)
-b6.place(x=100,y=500)
-b7.place(x=100,y=560)
-b8.place(x=100,y=620)
-b9.place(x=100,y=680)
-b10.place(x=100,y=740)
+price_label = Label(tk, text="Unit Price",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=870,y=180)
+price_entry = Spinbox(tk,from_=0.0, to=5000, increment=0.5,font=("Arial", 12),bd=3)
+price_entry.place(x=810,y=210)
 
-c1.place(x=450,y=200)
-c2.place(x=450,y=260)
-c3.place(x=450,y=320)
-c4.place(x=450,y=380)
-c5.place(x=450,y=440)
-c6.place(x=450,y=500)
-c7.place(x=450,y=560)
-c8.place(x=450,y=620)
-c9.place(x=450,y=680)
-c10.place(x=450,y=740)
+add_item_button = Button(tk, text="Add item",font=("Arial", 10,"bold"),bg="#1A374D",fg="#F5F5F5",command=add_item)
+add_item_button.place(x=1110,y=210)
 
-d1.place(x=600,y=200)
-d2.place(x=600,y=260)
-d3.place(x=600,y=320)
-d4.place(x=600,y=380)
-d5.place(x=600,y=440)
-d6.place(x=600,y=500)
-d7.place(x=600,y=560)
-d8.place(x=600,y=620)
-d9.place(x=600,y=680)
-d10.place(x=600,y=740)
+columns = ('particulars', 'quantity', 'unit_price', 'amount')
+tree = ttk.Treeview(tk, columns=columns, show="headings")
+tree.heading('particulars', text='Particulars')
+tree.heading('quantity', text='Quantity')
+tree.heading('unit_price', text='Unit Price')
+tree.heading('amount', text="Amount")
+tree.place(x=190,y=300)
 
-e1.place(x=750,y=200)
-e2.place(x=750,y=260)
-e3.place(x=750,y=320)
-e4.place(x=750,y=380)
-e5.place(x=750,y=440)
-e6.place(x=750,y=500)
-e7.place(x=750,y=560)
-e8.place(x=750,y=620)
-e9.place(x=750,y=680)
-e10.place(x=750,y=740)
+stotal_label = Label(tk, text="Sub Total : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=300)
+stotal_entry = Entry(tk,font=("Arial", 12),bd=3)
+stotal_entry.place(x=1210,y=300)
+
+cgst_label = Label(tk, text="CGST @9% : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=350)
+cgst_entry = Entry(tk,font=("Arial", 12),bd=3)
+cgst_entry.place(x=1210,y=350)
+
+sgst_label = Label(tk, text="SGST @9% : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=400)
+sgst_entry = Entry(tk,font=("Arial", 12),bd=3)
+sgst_entry.place(x=1210,y=400)
+
+gtotal_label = Label(tk, text="Grand Total : ",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1100,y=500)
+gtotal_entry = Entry(tk,font=("Arial", 12, "bold"),bd=3)
+gtotal_entry.place(x=1210,y=500)
+
+save_invoice_button = Button(tk, text="Generate Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=generate_invoice)
+save_invoice_button.place(x=650,y=580)
+new_invoice_button = Button(tk, text="New Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+new_invoice_button.place(x=650,y=640)
+edit_invoice_button = Button(tk, text="Edit Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+edit_invoice_button.place(x=650,y=700)
 
 tk.mainloop()
