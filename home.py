@@ -14,8 +14,7 @@ def login():
         tk.destroy()
         import mainpage
         
-Label(tk,text="\n",bg="white",fg="#1A374D").pack()
-a = Label(tk,text="AJRA TEX - KARUR",font=("Arial",30, "bold"),bg="white",fg="#1A374D").pack()
+a = Label(tk,text="AJRA TEX - KARUR",font=("Arial", 30, "bold"),bg="white",fg="#1A374D").place(x=585,y=20)
 b = Label(tk,text="LOGIN",font=("Arial",20,"bold"),bg="white",fg="#1A374D").place(x=720,y=130)
 c = Label(tk,text="USERNAME",font=("Arial",20),bg="white",fg="#1A374D").place(x=700,y=250)
 c1 = Entry(tk,font=("Calibri",18),bd=5,justify="center")

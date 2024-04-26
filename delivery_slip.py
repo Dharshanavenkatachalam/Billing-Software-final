@@ -4,12 +4,21 @@ from docxtpl import DocxTemplate
 import datetime
 import time
 from tkinter import messagebox
+import mysql.connector as sql
 
 tk=Tk()
 tk.geometry("1920x1080")
 tk.config(bg="#F5F5F5")
-tk.title("Invoice - Ajra Tex")
+tk.title("Delivery Slip - Ajra Tex")
 tk.configure(bg='white')
+
+mycon=sql.connect(host="localhost",user="root",passwd="gokul123",database="ajra")
+cursor=mycon.cursor()
+
+show = ("SELECT COUNT(*) FROM delivery_slip")
+cursor.execute(show)
+slip_no=cursor.fetchall()
+slip_no=int(slip_no[0][0])+1
 
 def clear_item():
     particulars_entry.delete(0,END)
@@ -40,17 +49,47 @@ def generate_delivery_slip():
                 "address":address,
                 "phone":phone,
                 "gst":gst,
+                "deliveryno": "DS-2425-{number:06}".format(number=slip_no),
                 "deliverydate":current_date,
                 "deliverytime":current_time,
                 "delivery_list": delivery_list})
     
-    doc_name = "new_delivery_slip" + name + datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S") + ".docx"
-    doc.save(doc_name)
+    doc_name = "DS-2425-{number:06}".format(number=slip_no)+".docx"
+    doc.save('F:/ABC Project/Consultancy Project/Project/Delivery Slips/'+doc_name)
     
+    particulars_data = ""
+    quantity_data = ""
+    price_data = ""
+    amount_data = ""
+    
+    for i in range(len(delivery_list)):
+        particulars_data += delivery_list[i][0]
+        quantity_data += str(delivery_list[i][1])
+                
+        if(i<len(delivery_list)-1):
+            particulars_data += ","
+            quantity_data += ","
+                
+    insert = ("INSERT INTO delivery_slip VALUES('{}','{}','{}','{}','{}','{}','{}','{}','{}')").format(slip_no,current_date,current_time,name,address,phone,gst,particulars_data,quantity_data)
+    cursor.execute(insert)
+    mycon.commit()
     messagebox.showinfo("Invoice Complete", "Invoice Complete")
+    
+def clear_delivery_slip():
+    name_entry.delete(0,END)
+    address_entry.delete(0,END)
+    phone_number_entry.delete(0,END)
+    gst_entry.delete(0,END)
+    
+    particulars_entry.delete(0,END)
+    quantity_entry.delete(0,END)
+    quantity_entry.insert(0, "0")
+        
+    for item in tree.get_children():
+        tree.delete(item)
 
-Label(tk,text="\n",bg="white",fg="#1A374D").pack()
-a = Label(tk,text="AJRA TEX - KARUR",font=("Arial", 30, "bold"),bg="white",fg="#1A374D").pack()
+a = Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
+slip_number_label = Label(tk,text="Delivery Slip Number : DS-2425-{number:06}".format(number=slip_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1200,y=20)
 
 '''------- Buyer details -------'''
 
@@ -91,7 +130,7 @@ tree.place(x=580,y=300)
 
 save_slip_button = Button(tk, text="Generate Delivery Slip",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=generate_delivery_slip)
 save_slip_button.place(x=650,y=580)
-new_slip_button = Button(tk, text="New Delivery Slip",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+new_slip_button = Button(tk, text="Clear Delivery Slip",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=clear_delivery_slip)
 new_slip_button.place(x=650,y=640)
 edit_slip_button = Button(tk, text="Edit Delivery Slip",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
 edit_slip_button.place(x=650,y=700)

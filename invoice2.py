@@ -34,8 +34,7 @@ def new_invoice():
     invoice_list.clear()
     def generate_invoice():
     doc = DocxTemplate("invoice_template.docx")
-    name = first_name_entry.get()+las
-t_name_entry.get()
+    name = first_name_entry.get()+last_name_entry.get()
     phone = phone_entry.get()
     subtotal = sum(item[3] for item in invoice_list) 
     salestax = 0.1
