@@ -41,15 +41,16 @@ def generate_delivery_slip():
     address = address_entry.get()
     phone = phone_number_entry.get()
     gst = gst_entry.get()
+    dsno = "DS-2425-{number:06}".format(number=slip_no)
     current_date = datetime.date.today()
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
-        
+
     doc.render({"name":name,
                 "address":address,
                 "phone":phone,
                 "gst":gst,
-                "deliveryno": "DS-2425-{number:06}".format(number=slip_no),
+                "deliveryno": dsno,
                 "deliverydate":current_date,
                 "deliverytime":current_time,
                 "delivery_list": delivery_list})
@@ -70,7 +71,7 @@ def generate_delivery_slip():
             particulars_data += ","
             quantity_data += ","
                 
-    insert = ("INSERT INTO delivery_slip VALUES('{}','{}','{}','{}','{}','{}','{}','{}','{}')").format(slip_no,current_date,current_time,name,address,phone,gst,particulars_data,quantity_data)
+    insert = ("INSERT INTO delivery_slip VALUES('{}','{}','{}','{}','{}','{}','{}','{}','{}')").format(dsno,current_date,current_time,name,address,phone,gst,particulars_data,quantity_data)
     cursor.execute(insert)
     mycon.commit()
     messagebox.showinfo("Invoice Complete", "Invoice Complete")

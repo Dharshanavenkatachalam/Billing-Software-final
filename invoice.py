@@ -105,7 +105,7 @@ def generate_invoice():
     
     messagebox.showinfo("Invoice Complete", "Invoice Complete")
     
-def clear_invoice():
+def new_invoice():
     name_entry.delete(0,END)
     address_entry.delete(0,END)
     phone_number_entry.delete(0,END)
@@ -134,6 +134,9 @@ def clear_invoice():
     invoice_no=cursor.fetchall()
     invoice_no=int(invoice_no[0][0])+1
     Label(tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
+
+def edit_invoice():
+    import invoice_edit
     
 Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
 Label(tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
@@ -203,10 +206,13 @@ gtotal_entry.insert(0,"0.0")
 save_invoice_button = Button(tk, text="Generate Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=generate_invoice)
 save_invoice_button.place(x=650,y=580)
 
-new_invoice_button = Button(tk, text="Clear Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=clear_invoice)
+new_invoice_button = Button(tk, text="New Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=new_invoice)
 new_invoice_button.place(x=650,y=640)
 
-edit_invoice_button = Button(tk, text="Edit Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+edit_invoice_button = Button(tk, text="Edit Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=edit_invoice)
 edit_invoice_button.place(x=650,y=700)
+
+view_invoice_button = Button(tk, text="View Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+view_invoice_button.place(x=650,y=760)
 
 tk.mainloop()
