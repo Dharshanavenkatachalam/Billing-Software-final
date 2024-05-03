@@ -14,6 +14,7 @@ tk.configure(bg='white')
 
 mycon=sql.connect(host="localhost",user="root",passwd="gokul123",database="ajra")
 cursor=mycon.cursor()
+edit_selected_item = ""
 
 def clear_item():
     particulars_entry.delete(0,END)
@@ -52,7 +53,6 @@ def edit_invoice():
     cursor.execute(show)
     data=cursor.fetchall()[0]
     
-    print(data)  
     name_entry.insert(0,data[3])
     address_entry.insert(0,data[4])
     phone_number_entry.insert(0,data[5])
@@ -87,8 +87,7 @@ def edit_selection():
    quantity_entry.insert(0,int(item[1]))
    price_entry.delete(0,END)
    price_entry.insert(0,float(item[2]))
-      
-    
+   
 Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
 Label(tk,text="Invoice Number : ",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=580,y=100)
 
