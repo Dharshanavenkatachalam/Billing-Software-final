@@ -1,10 +1,11 @@
 from tkinter import *
 from tkinter import ttk
 from docxtpl import DocxTemplate
-import datetime
+from datetime import date
 import time
 from tkinter import messagebox
 import mysql.connector as sql
+import win32com.client
 
 tk=Tk()
 tk.geometry("1920x1080")
@@ -58,7 +59,7 @@ def generate_invoice():
     phone = phone_number_entry.get()
     gst = gst_entry.get()
     inno = "IN-2425-{number:06}".format(number=invoice_no)
-    current_date = datetime.date.today()
+    current_date = date.today()
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
     subtotal = sum(item[3] for item in invoice_list)
@@ -98,7 +99,11 @@ def generate_invoice():
     
     insert = ("INSERT INTO invoice VALUES('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')").format(inno,current_date,current_time,name,address,phone,gst,particulars_data,quantity_data,price_data,amount_data,str(subtotal),str(cgst),str(sgst),str(gtotal))
     cursor.execute(insert)
-    mycon.commit()         
+    mycon.commit()
+    
+    insert = ("INSERT INTO accounts VALUES('{particulars}',{amount},'{date}')").format(date=current_date,particulars=inno,amount=gtotal)
+    cursor.execute(insert)
+    mycon.commit()     
            
     doc_name = "IN-2425-{number:06}".format(number=invoice_no)+".docx"
     doc.save('F:/ABC Project/Consultancy Project/Project/Invoices/'+doc_name)
@@ -137,6 +142,13 @@ def new_invoice():
 
 def edit_invoice():
     import invoice_edit
+
+def print_document():
+    word_app = win32com.client.Dispatch("Word.Application")
+    doc = word_app.Documents.Open("F:\\ABC Project\\Consultancy Project\\Project\\Invoices\\IN-2425-000001.docx")
+    doc.PrintOut()
+    doc.Close()
+    word_app.Quit()
     
 Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
 Label(tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
@@ -212,7 +224,7 @@ new_invoice_button.place(x=650,y=640)
 edit_invoice_button = Button(tk, text="Edit Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=edit_invoice)
 edit_invoice_button.place(x=650,y=700)
 
-view_invoice_button = Button(tk, text="View Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+view_invoice_button = Button(tk, text="View Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=print_document)
 view_invoice_button.place(x=650,y=760)
 
 tk.mainloop()

@@ -1,7 +1,8 @@
 from tkinter import *
 from datetime import date
-import time
 import mysql.connector as sql
+from docx2pdf import convert
+from docxtpl import DocxTemplate
 
 tk=Tk()
 tk.geometry("1920x1080")
@@ -102,6 +103,7 @@ def from_account_save():
 def to_account_save():
     particulars = to_particulars_entry.get()
     amount = float(to_amount_entry.get())
+    
     today = date.today()
     insert = ("INSERT INTO accounts VALUES('{particulars}',{amount},'{date}')").format(date=today,particulars=particulars,amount=amount)
     cursor.execute(insert)
@@ -110,6 +112,54 @@ def to_account_save():
     to_amount_entry.delete(0,END)
     display_block()
 
+def generate_report():
+    date1 = str(from_date_entry.get())
+    date2 = str(to_date_entry.get())
+    
+    show = ("SELECT * FROM accounts where Date BETWEEN '{}' AND '{}'").format(date1,date2)
+    cursor.execute(show)
+    data=cursor.fetchall()
+    
+    show = ("SELECT SUM(amount) FROM accounts where Date < '{}' ").format(date1)
+    cursor.execute(show)
+    open_balance=float(cursor.fetchall()[0][0])
+    
+    show = ("SELECT SUM(amount) FROM accounts where Date <= '{}' ").format(date2)
+    cursor.execute(show)
+    close_balance=float(cursor.fetchall()[0][0])
+
+    data_list = []
+    from_total = 0.0
+    to_total = 0.0
+    for i in data:
+        nest_list = []
+        nest_list.append(i[2])
+        nest_list.append(i[0])
+        
+        if(float(i[1]) < 0):
+            from_total += float(i[1])*(-1)
+            nest_list.append(i[1]*(-1))
+            nest_list.append("")
+        else:
+            to_total += float(i[1])
+            nest_list.append("")
+            nest_list.append(i[1])
+        
+        data_list.append(nest_list)
+    
+    doc = DocxTemplate("expence_template.docx")
+    
+    doc.render({"from_date":date1,
+                "to_date":date2,
+                "expence_list": data_list,
+                "total_from":from_total,
+                "total_to":to_total,
+                "open_balance":open_balance,
+                "close_balance":close_balance})
+    
+    doc_name = "Expence_Report_"+date1+"_"+date2+".docx"
+    doc.save('F:/ABC Project/Consultancy Project/Project/Expences Report/'+doc_name)
+    
 Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
 
 '''------- From Account -------'''
@@ -129,7 +179,7 @@ from_save_button.place(x=370,y=230)
 '''------- To Account -------'''
 
 Label(tk, text="- - - - - To Account - - - - -",font=("Arial", 13,"bold"),bg="white",fg="#1A374D").place(x=480,y=350)
-to_particulars_lable = Label(tk, text="Particulars",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=550,y=400)
+to_particulars_lable = Label(tk, text="Particulars",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=405,y=400)
 to_particulars_entry = Entry(tk,font=("Arial", 12),bd=3)
 to_particulars_entry.place(x=350,y=430)
 
@@ -151,7 +201,7 @@ to_date_lable = Label(tk, text="To Date",font=("Arial", 12,"bold"),bg="white",fg
 to_date_entry = Entry(tk,font=("Arial", 12),bd=3)
 to_date_entry.place(x=600,y=680)
 
-generate_button = Button(tk, text="Generate Report",font=("Arial", 10,"bold"),bg="#1A374D",fg="#F5F5F5",width=50)
+generate_button = Button(tk, text="Generate Report",font=("Arial", 10,"bold"),bg="#1A374D",fg="#F5F5F5",width=50,command=generate_report)
 generate_button.place(x=370,y=730)
 
 display_block()

@@ -128,7 +128,7 @@ price_entry = Spinbox(tk,from_=0.0, to=5000, increment=0.5,font=("Arial", 12),bd
 price_entry.place(x=810,y=260)
 
 add_item_button = Button(tk, text="Add item",font=("Arial", 10,"bold"),bg="#1A374D",fg="#F5F5F5",command=add_item)
-add_item_button.place(x=1110,y=260)
+add_item_button.place(x=1110,y=255)
 
 columns = ('particulars', 'quantity', 'unit_price', 'amount')
 tree = ttk.Treeview(tk, columns=columns, show="headings")
@@ -160,5 +160,14 @@ gtotal_label = Label(tk, text="Grand Total : ",font=("Arial", 12,"bold"),bg="whi
 gtotal_entry = Entry(tk,font=("Arial", 12, "bold"),bd=3)
 gtotal_entry.place(x=1210,y=500)
 gtotal_entry.insert(0,"0.0")
+
+save_invoice_button = Button(tk, text="Generate Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+save_invoice_button.place(x=650,y=640)
+
+new_invoice_button = Button(tk, text="New Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+new_invoice_button.place(x=650,y=700)
+
+view_invoice_button = Button(tk, text="View Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2)
+view_invoice_button.place(x=650,y=760)
 
 tk.mainloop()
