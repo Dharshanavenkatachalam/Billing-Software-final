@@ -5,13 +5,14 @@ from datetime import date
 import time
 from tkinter import messagebox
 import mysql.connector as sql
-import win32com.client
+import os
+import win32print
 
-tk=Tk()
-tk.geometry("1920x1080")
-tk.config(bg="#F5F5F5")
-tk.title("Invoice - Ajra Tex")
-tk.configure(bg='white')
+invoice_tk=Tk()
+invoice_tk.geometry("1920x1080")
+invoice_tk.config(bg="#F5F5F5")
+invoice_tk.title("Invoice - Ajra Tex")
+invoice_tk.configure(bg='white')
 
 mycon=sql.connect(host="localhost",user="root",passwd="gokul123",database="ajra")
 cursor=mycon.cursor()
@@ -108,7 +109,12 @@ def generate_invoice():
     doc_name = "IN-2425-{number:06}".format(number=invoice_no)+".docx"
     doc.save('F:/ABC Project/Consultancy Project/Project/Invoices/'+doc_name)
     
-    messagebox.showinfo("Invoice Complete", "Invoice Complete")
+    answer = messagebox.askyesno("Print invoice", "Do you want to print the invoice?")
+    
+    if(answer == True):
+        print_document()
+        
+    messagebox.showinfo("Invoice Saved", "Invoice Saved Successfully")
     
 def new_invoice():
     name_entry.delete(0,END)
@@ -138,93 +144,97 @@ def new_invoice():
     cursor.execute(show)
     invoice_no=cursor.fetchall()
     invoice_no=int(invoice_no[0][0])+1
-    Label(tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
+    Label(invoice_tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
 
 def edit_invoice():
     import invoice_edit
 
 def print_document():
-    word_app = win32com.client.Dispatch("Word.Application")
-    doc = word_app.Documents.Open("F:\\ABC Project\\Consultancy Project\\Project\\Invoices\\IN-2425-000001.docx")
-    doc.PrintOut()
-    doc.Close()
-    word_app.Quit()
+    file_path = "F:/ABC Project/Consultancy Project/Project/Invoices/"+"IN-2425-{number:06}".format(number=invoice_no)+".docx"
+    printer_path = 'Microsoft Print to PDF'
+    file_handle = open(file_path, 'rb')
     
-Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
-Label(tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
+    printer_handle = win32print.OpenPrinter(printer_path)
+    JobInfo = win32print.StartDocPrinter(printer_handle, 1, (file_path, None, "RAW"))
+    win32print.StartPagePrinter(printer_handle)
+    win32print.WritePrinter(printer_handle, file_handle.read())
+    win32print.EndPagePrinter(printer_handle)
+    
+Label(invoice_tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
+Label(invoice_tk,text="Invoice Number : IN-2425-{number:06}".format(number=invoice_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1250,y=20)
 '''------- Buyer details -------'''
 
-name_label = Label(tk, text="Name",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=260,y=100)
-name_entry = Entry(tk,font=("Arial", 12),bd=3)
+name_label = Label(invoice_tk, text="Name",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=260,y=100)
+name_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 name_entry.place(x=190,y=130)
 
-address_label = Label(tk, text="Address",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=560,y=100)
-address_entry = Entry(tk,font=("Arial", 12),bd=3)
+address_label = Label(invoice_tk, text="Address",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=560,y=100)
+address_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 address_entry.place(x=500,y=130)
 
-phone_number_label = Label(tk, text="Phone number",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=850,y=100)
-phone_number_entry = Entry(tk,font=("Arial", 12),bd=3)
+phone_number_label = Label(invoice_tk, text="Phone number",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=850,y=100)
+phone_number_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 phone_number_entry.place(x=810,y=130)
 
-gst_label = Label(tk, text="GST number",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1160,y=100)
-gst_entry = Entry(tk,font=("Arial", 12),bd=3)
+gst_label = Label(invoice_tk, text="GST number",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1160,y=100)
+gst_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 gst_entry.place(x=1110,y=130)
 
 '''------- Product details -------'''
 
-particulars_label = Label(tk, text="Particulars",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=240,y=180)
-particulars_entry = Entry(tk,font=("Arial", 12),bd=3)
+particulars_label = Label(invoice_tk, text="Particulars",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=240,y=180)
+particulars_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 particulars_entry.place(x=190,y=210)
 
-quantity_label = Label(tk, text="Quantity",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=560,y=180)
-quantity_entry = Spinbox(tk, from_=0,to=100,font=("Arial", 12),bd=3)
+quantity_label = Label(invoice_tk, text="Quantity",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=560,y=180)
+quantity_entry = Spinbox(invoice_tk, from_=0,to=100,font=("Arial", 12),bd=3)
 quantity_entry.place(x=500,y=210)
 
-price_label = Label(tk, text="Unit Price",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=870,y=180)
-price_entry = Spinbox(tk,from_=0.0, to=5000, increment=0.5,font=("Arial", 12),bd=3)
+price_label = Label(invoice_tk, text="Unit Price",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=870,y=180)
+price_entry = Spinbox(invoice_tk,from_=0.0, to=5000, increment=0.5,font=("Arial", 12),bd=3)
 price_entry.place(x=810,y=210)
 
-add_item_button = Button(tk, text="Add item",font=("Arial", 10,"bold"),bg="#1A374D",fg="#F5F5F5",command=add_item)
+add_item_button = Button(invoice_tk, text="Add item",font=("Arial", 10,"bold"),bg="#1A374D",fg="#F5F5F5",command=add_item)
 add_item_button.place(x=1110,y=210)
 
 columns = ('particulars', 'quantity', 'unit_price', 'amount')
-tree = ttk.Treeview(tk, columns=columns, show="headings")
+tree = ttk.Treeview(invoice_tk, columns=columns, show="headings")
 tree.heading('particulars', text='Particulars')
 tree.heading('quantity', text='Quantity')
 tree.heading('unit_price', text='Unit Price')
 tree.heading('amount', text="Amount")
 tree.place(x=190,y=300)
 
-stotal_label = Label(tk, text="Sub Total : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=300)
-stotal_entry = Entry(tk,font=("Arial", 12),bd=3)
+stotal_label = Label(invoice_tk, text="Sub Total : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=300)
+stotal_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 stotal_entry.place(x=1210,y=300)
 stotal_entry.insert(0,"0.0")
 
-cgst_label = Label(tk, text="CGST @9% : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=350)
-cgst_entry = Entry(tk,font=("Arial", 12),bd=3)
+cgst_label = Label(invoice_tk, text="CGST @9% : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=350)
+cgst_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 cgst_entry.place(x=1210,y=350)
 cgst_entry.insert(0,"0.0")
 
-sgst_label = Label(tk, text="SGST @9% : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=400)
-sgst_entry = Entry(tk,font=("Arial", 12),bd=3)
+sgst_label = Label(invoice_tk, text="SGST @9% : ",font=("Arial", 12),bg="white",fg="#1A374D").place(x=1100,y=400)
+sgst_entry = Entry(invoice_tk,font=("Arial", 12),bd=3)
 sgst_entry.place(x=1210,y=400)
 sgst_entry.insert(0,"0.0")
 
-gtotal_label = Label(tk, text="Grand Total : ",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1100,y=500)
-gtotal_entry = Entry(tk,font=("Arial", 12, "bold"),bd=3)
+gtotal_label = Label(invoice_tk, text="Grand Total : ",font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1100,y=500)
+gtotal_entry = Entry(invoice_tk,font=("Arial", 12, "bold"),bd=3)
 gtotal_entry.place(x=1210,y=500)
 gtotal_entry.insert(0,"0.0")
 
-save_invoice_button = Button(tk, text="Generate Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=generate_invoice)
+save_invoice_button = Button(invoice_tk, text="Generate Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=generate_invoice)
 save_invoice_button.place(x=650,y=580)
 
-new_invoice_button = Button(tk, text="New Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=new_invoice)
+new_invoice_button = Button(invoice_tk, text="New Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=new_invoice)
 new_invoice_button.place(x=650,y=640)
 
-edit_invoice_button = Button(tk, text="Edit Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=edit_invoice)
+edit_invoice_button = Button(invoice_tk, text="Edit Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=edit_invoice)
 edit_invoice_button.place(x=650,y=700)
 
-view_invoice_button = Button(tk, text="View Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=print_document)
+view_invoice_button = Button(invoice_tk, text="View Invoice",font=("Arial",10,"bold"),bg="#1A374D",fg="#F5F5F5",width=30,height=2,command=print_document)
 view_invoice_button.place(x=650,y=760)
 
-tk.mainloop()
+invoice_tk.mainloop()

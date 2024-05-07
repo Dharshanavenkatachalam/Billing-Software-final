@@ -5,6 +5,7 @@ import datetime
 import time
 from tkinter import messagebox
 import mysql.connector as sql
+import win32print
 
 tk=Tk()
 tk.geometry("1920x1080")
@@ -74,7 +75,10 @@ def generate_delivery_slip():
     insert = ("INSERT INTO delivery_slip VALUES('{}','{}','{}','{}','{}','{}','{}','{}','{}')").format(dsno,current_date,current_time,name,address,phone,gst,particulars_data,quantity_data)
     cursor.execute(insert)
     mycon.commit()
-    messagebox.showinfo("Invoice Complete", "Invoice Complete")
+    answer = messagebox.askyesno("Delivery Slip", "Do you want to print the delivery slip?")
+    if(answer == True):
+        print_document()
+    messagebox.showinfo("Delivery Slip", "Delivery Slip Generated Successfully")
     
 def clear_delivery_slip():
     name_entry.delete(0,END)
@@ -88,6 +92,17 @@ def clear_delivery_slip():
         
     for item in tree.get_children():
         tree.delete(item)
+
+def print_document():
+    file_path = "F:/ABC Project/Consultancy Project/Project/Invoices/"+"DS-2425-{number:06}".format(number=slip_no)+".docx"
+    printer_path = 'Microsoft Print to PDF'
+    file_handle = open(file_path, 'rb')
+    
+    printer_handle = win32print.OpenPrinter(printer_path)
+    JobInfo = win32print.StartDocPrinter(printer_handle, 1, (file_path, None, "RAW"))
+    win32print.StartPagePrinter(printer_handle)
+    win32print.WritePrinter(printer_handle, file_handle.read())
+    win32print.EndPagePrinter(printer_handle)
 
 a = Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
 slip_number_label = Label(tk,text="Delivery Slip Number : DS-2425-{number:06}".format(number=slip_no),font=("Arial", 12,"bold"),bg="white",fg="#1A374D").place(x=1200,y=20)
