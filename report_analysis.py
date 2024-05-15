@@ -3,11 +3,11 @@ from tkinter import ttk
 import mysql.connector as sql
 from tkinter import Canvas
 
-tk=Tk()
-tk.geometry("1920x1080")
-tk.config(bg="#F5F5F5")
-tk.title("Report and Analysis - Ajra Tex")
-tk.configure(bg='white')
+ra_tk=Tk()
+ra_tk.geometry("1920x1080")
+ra_tk.config(bg="#F5F5F5")
+ra_tk.title("Report and Analysis - Ajra Tex")
+ra_tk.configure(bg='white')
 
 mycon=sql.connect(host="localhost",user="root",passwd="gokul123",database="ajra")
 cursor=mycon.cursor()
@@ -36,14 +36,14 @@ for i in range(12):
     tup = (months[i], sales_list[i], purchase_list[i])
     data.append(tup)
 
-Label(tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
+Label(ra_tk,text="AJRA TEX - KARUR",font=("Arial", 20, "bold"),bg="white",fg="#1A374D").place(x=650,y=20)
 
 '''---------- Monthly Income Report ----------'''
 
-Label(tk,text="Monthly Income Report",font=("Arial", 15, "bold"),bg="white",fg="#1A374D").place(x=190,y=100)
+Label(ra_tk,text="Monthly Income Report",font=("Arial", 15, "bold"),bg="white",fg="#1A374D").place(x=190,y=100)
 
 columns = ('months', 'income')
-tree = ttk.Treeview(tk, columns=columns, show="headings")
+tree = ttk.Treeview(ra_tk, columns=columns, show="headings")
 tree.heading('months', text='Months')
 tree.heading('income', text='Income')
 tree.place(x=100,y=150) 
@@ -53,9 +53,9 @@ for i in range(12):
     
 '''---------- Monthly Expence Report ----------'''
 
-Label(tk,text="Monthly Expence Report",font=("Arial", 15, "bold"),bg="white",fg="#1A374D").place(x=190,y=450)
+Label(ra_tk,text="Monthly Expence Report",font=("Arial", 15, "bold"),bg="white",fg="#1A374D").place(x=190,y=450)
 columns = ('months', 'expences')
-tree = ttk.Treeview(tk, columns=columns, show="headings")
+tree = ttk.Treeview(ra_tk, columns=columns, show="headings")
 tree.heading('months', text='Months')
 tree.heading('expences', text='Expences')
 tree.place(x=100,y=500)           
@@ -88,14 +88,14 @@ def draw_bar_chart(canvas, data):
         
         x += BAR_WIDTH + BAR_SPACING
             
-canvas = Canvas(tk, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg="white")
+canvas = Canvas(ra_tk, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg="white")
 canvas.place(x=650,y=150)
 draw_bar_chart(canvas, data)
 
-Label(tk,text="    ",bg="#21a1f1",fg="#21a1f1").place(x=700,y=720)
-Label(tk,text="Income",font=("Arial", 12),bg="white",fg="black").place(x=730,y=718)
+Label(ra_tk,text="    ",bg="#21a1f1",fg="#21a1f1").place(x=700,y=720)
+Label(ra_tk,text="Income",font=("Arial", 12),bg="white",fg="black").place(x=730,y=718)
 
-Label(tk,text="    ",bg="#d90d1b",fg="#d90d1b").place(x=900,y=720)
-Label(tk,text="Expences",font=("Arial", 12),bg="white",fg="black").place(x=930,y=718)
+Label(ra_tk,text="    ",bg="#d90d1b",fg="#d90d1b").place(x=900,y=720)
+Label(ra_tk,text="Expences",font=("Arial", 12),bg="white",fg="black").place(x=930,y=718)
 
-tk.mainloop()
+ra_tk.mainloop()
